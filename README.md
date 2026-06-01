@@ -1,163 +1,165 @@
-# GestorIQ
+﻿# GestorIQ
 
-Sistema de gestão de estoque desenvolvido para a disciplina de Desenvolvimento Web, seguindo o padrão REST e utilizando infraestrutura baseada em containers Docker.
+Sistema de gestão de estoque em API REST containerizada com Docker e orquestração via Docker Compose.
 
-## Objetivo
+## 1. Objetivo
 
-O GestorIQ tem como objetivo fornecer uma API REST para gerenciamento de estoque, permitindo o controle de usuários, produtos, categorias e movimentações de estoque através de endpoints seguros e documentados.
+Este repositório contém a infraestrutura do GestorIQ, incluindo:
+- build e imagem do backend Node.js
+- serviço PostgreSQL com persistência
+- proxy reverso Nginx
+- orquestração com Docker Compose
 
-O projeto foi desenvolvido com foco em:
+O backend atual é um esqueleto funcional para iniciar a aplicação em containers.
 
-* Arquitetura em camadas
-* Boas práticas REST
-* Containerização com Docker
-* Persistência de dados em PostgreSQL
-* Autenticação via JWT
-* Documentação com Swagger
+## 2. Visão Geral da Arquitetura
 
----
-
-## Tecnologias Utilizadas
-
-### Backend
-
-* Node.js
-* Express
-* Sequelize ORM
-* PostgreSQL
-* JWT
-* Bcrypt
-
-### Infraestrutura
-
-* Docker
-* Docker Compose
-* Nginx
-* Named Volumes
-* Custom Bridge Network
-
-### Documentação
-
-* Swagger
-* README
-* Postman
-
----
-
-## Arquitetura
-
-A aplicação segue a seguinte arquitetura:
-
-```text
-Host
-  │
-  ▼
-Nginx
-  │
-  ▼
-Node.js API
-  │
-  ▼
-PostgreSQL
+```
+Cliente --> Nginx (80) --> App Node.js (3000) --> PostgreSQL (5432)
 ```
 
-O Nginx atua como proxy reverso, sendo o único serviço exposto ao host.
+- `nginx`: único serviço exposto ao host
+- `app`: API Node.js interna
+- `postgres`: banco de dados interno
 
----
+## 3. Tecnologias
 
-## Estrutura do Projeto
+- Node.js 24-alpine
+- Express 5
+- PostgreSQL 17-alpine
+- Nginx 1.27-alpine
+- Docker Compose 3.9
 
-```text
-src/
-├── config/
-├── controllers/
-├── middlewares/
-├── models/
-├── routes/
-├── services/
-├── utils/
-├── app.js
-└── server.js
+## 4. Pré-requisitos
 
-docs/
-nginx/
-Dockerfile
-docker-compose.yml
-README.md
-```
+- Docker Desktop instalado e em execução
+- Docker Compose disponível
+- Git para clonar o repositório
 
----
+## 5. Configuração de Ambiente
 
-## Como Executar
-
-### 1. Clonar o projeto
+O template de variáveis de ambiente está em `backend/.env.example`.
 
 ```bash
-git clone <repositorio>
-cd GestorIQ
+cp backend/.env.example backend/.env
 ```
 
-### 2. Configurar variáveis de ambiente
+Edite `backend/.env` e altere ao menos:
+- `DB_PASSWORD`
+- `JWT_SECRET`
+- `NODE_ENV=production` para produção
+
+> Nunca comite `backend/.env` no repositório.
+
+## 6. Como executar
 
 ```bash
-cp .env.example .env
+docker compose build --no-cache
+docker compose up -d
 ```
 
-### 3. Subir os containers
+Para parar:
 
 ```bash
-docker compose up --build
+docker compose down
 ```
 
----
+Para reiniciar após alteração do Dockerfile ou do Compose:
 
-## Containers
-
-O ambiente é composto por:
-
-| Serviço  | Descrição                 |
-| -------- | ------------------------- |
-| nginx    | Proxy reverso             |
-| app      | API Node.js               |
-| postgres | Banco de dados PostgreSQL |
-| redis*   | Cache (caso utilizado)    |
-
----
-
-## Documentação da API
-
-A documentação Swagger estará disponível em:
-
-```text
-/api-docs
+```bash
+docker compose up -d --build
 ```
 
----
+## 7. Serviços e portas
 
-## Autenticação
+| Serviço | Container | Porta no host | Observação |
+|--------|-----------|---------------|-----------|
+| Nginx | `gestoriq_nginx` | `80:80` | Proxy reverso para `app` |
+| App | `gestoriq_app` | exposto internamente | Rodando em `3000` no container |
+| PostgreSQL | `gestoriq_postgres` | exposto internamente | Persistência de dados |
 
-O sistema utiliza JWT.
+## 8. O que está pronto
 
-Fluxo:
+- `Dockerfile` com multi-stage build e healthcheck
+- `docker-compose.yml` com redes e volume para PostgreSQL
+- `nginx/nginx.conf` configurado para proxy e headers básicos
+- `backend/.env.example` com variáveis necessárias
+- `backend/src/app.js` e `backend/src/server.js` com endpoints de status
 
-1. Login do usuário
-2. Geração do token
-3. Envio do token no header Authorization
+## 9. Health checks
 
-Exemplo:
+- `GET /health` no app retorna status de serviço
+- Nginx também responde `/health` internamente
+- Use `docker compose ps` para ver status de containers
 
-```text
-Authorization: Bearer TOKEN
+## 10. Verificação rápida
+
+```bash
+docker compose ps
+docker compose logs -f app
+docker compose logs -f nginx
+docker compose logs -f postgres
 ```
 
----
+Acesse:
+- `http://localhost/` pelo Nginx
+- `http://localhost/health` pelo Nginx
 
-## Equipe
+## 11. Estrutura do projeto
 
-Projeto acadêmico desenvolvido para a disciplina de Desenvolvimento Web.
+```
+GestorIQ-1/
+├── backend/
+│   ├── .env.example
+│   ├── package.json
+│   └── src/
+├── nginx/
+│   └── nginx.conf
+├── Dockerfile
+├── docker-compose.yml
+└── docs/
+    ├── architecture.md
+    └── infrastructure.md
+```
 
----
+## 12. Notas para o time de backend
 
-## Licença
+A infraestrutura já está configurada, mas o backend precisa de implementação adicional nas pastas:
+- `backend/src/controllers`
+- `backend/src/routes`
+- `backend/src/models`
+- `backend/src/services`
+- `backend/src/middlewares`
 
-Projeto desenvolvido exclusivamente para fins educacionais.
+## 13. Troubleshooting
+
+### Erro de porta ocupada
+
+```bash
+docker compose down
+docker compose up -d
+```
+
+Se o problema persistir, verifique qual processo usa a porta 80 no host.
+
+### Erro de conexão com Postgres
+
+- Verifique se o serviço está saudável: `docker compose ps`
+- Verifique logs: `docker compose logs postgres`
+
+### Erro de variáveis de ambiente
+
+- Confirme que `backend/.env` existe
+- Verifique se `backend/.env.example` está correto
+
+## 14. Documentação complementar
+
+Os detalhes técnicos completos e a justificativa da infraestrutura estão em:
+- `docs/architecture.md`
+- `docs/infrastructure.md`
+
+## 15. Observações finais
+
+- Use `backend/.env.example` como único template de ambiente.
+- O arquivo `backend/.env` deve ficar local, não versionado.
+- O backend atual é mínimo, mas a infraestrutura está configurada para rodar.
