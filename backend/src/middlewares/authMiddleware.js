@@ -5,11 +5,17 @@ function authMiddleware(req, res, next) {
 
   if (!authHeader) {
     return res.status(401).json({
-      message: 'Token não fornecido',
+      message: 'Token não informado',
     });
   }
 
-  const token = authHeader.split(' ')[1];
+  const [scheme, token] = authHeader.split(' ');
+
+  if (scheme !== 'Bearer' || !token) {
+    return res.status(401).json({
+      message: 'Token inválido',
+    });
+  }
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
@@ -19,7 +25,7 @@ function authMiddleware(req, res, next) {
     return next();
   } catch (error) {
     return res.status(401).json({
-      message: 'Token inválido',
+      message: 'Token inválido ou expirado',
     });
   }
 }

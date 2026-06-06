@@ -22,7 +22,12 @@ async function registerUser(userData) {
     role: userData.role || 'viewer',
   });
 
-  return user;
+  return {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    role: user.role,
+  };
 }
 
 async function loginUser(email, password) {
