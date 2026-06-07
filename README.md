@@ -5,6 +5,7 @@ Sistema de gestão de estoque em API REST containerizada com Docker e orquestra�
 ## 1. Objetivo
 
 Este repositório contém a infraestrutura do GestorIQ, incluindo:
+
 - build e imagem do backend Node.js
 - serviço PostgreSQL com persistência
 - proxy reverso Nginx
@@ -45,6 +46,7 @@ cp backend/.env.example backend/.env
 ```
 
 Edite `backend/.env` e altere ao menos:
+
 - `DB_PASSWORD`
 - `JWT_SECRET`
 - `NODE_ENV=production` para produção
@@ -72,11 +74,11 @@ docker compose up -d --build
 
 ## 7. Serviços e portas
 
-| Serviço | Container | Porta no host | Observação |
-|--------|-----------|---------------|-----------|
-| Nginx | `gestoriq_nginx` | `80:80` | Proxy reverso para `app` |
-| App | `gestoriq_app` | exposto internamente | Rodando em `3000` no container |
-| PostgreSQL | `gestoriq_postgres` | exposto internamente | Persistência de dados |
+| Serviço    | Container           | Porta no host        | Observação                     |
+| ---------- | ------------------- | -------------------- | ------------------------------ |
+| Nginx      | `gestoriq_nginx`    | `80:80`              | Proxy reverso para `app`       |
+| App        | `gestoriq_app`      | exposto internamente | Rodando em `3000` no container |
+| PostgreSQL | `gestoriq_postgres` | exposto internamente | Persistência de dados          |
 
 ## 8. O que está pronto
 
@@ -102,6 +104,7 @@ docker compose logs -f postgres
 ```
 
 Acesse:
+
 - `http://localhost/` pelo Nginx
 - `http://localhost/health` pelo Nginx
 
@@ -125,6 +128,7 @@ GestorIQ-1/
 ## 12. Notas para o time de backend
 
 A infraestrutura já está configurada, mas o backend precisa de implementação adicional nas pastas:
+
 - `backend/src/controllers`
 - `backend/src/routes`
 - `backend/src/models`
@@ -155,6 +159,7 @@ Se o problema persistir, verifique qual processo usa a porta 80 no host.
 ## 14. Documentação complementar
 
 Os detalhes técnicos completos e a justificativa da infraestrutura estão em:
+
 - `docs/architecture.md`
 - `docs/infrastructure.md`
 
@@ -163,3 +168,120 @@ Os detalhes técnicos completos e a justificativa da infraestrutura estão em:
 - Use `backend/.env.example` como único template de ambiente.
 - O arquivo `backend/.env` deve ficar local, não versionado.
 - O backend atual é mínimo, mas a infraestrutura está configurada para rodar.
+
+---
+
+## 16. Entidades e Relacionamentos
+
+| Tabela               | Descrição                                                   |
+| -------------------- | ----------------------------------------------------------- |
+| `usuarios`           | Usuários do sistema com autenticação                        |
+| `produtos`           | Produtos do estoque                                         |
+| `categorias`         | Categorias dos produtos                                     |
+| `fornecedores`       | Fornecedores dos produtos                                   |
+| `produto_fornecedor` | **Tabela pivô** — relação N:N entre produtos e fornecedores |
+
+### Relação N:N
+
+Um produto pode ter vários fornecedores e um fornecedor pode fornecer vários produtos.
+Essa relação é gerenciada pela tabela pivô `produto_fornecedor`, que possui Model própria.
+
+---
+
+## 17. CRUD das Entidades
+
+### Produtos
+
+| Método | Rota                | Descrição                |
+| ------ | ------------------- | ------------------------ |
+| GET    | `/api/produtos`     | Listar todos os produtos |
+| GET    | `/api/produtos/:id` | Buscar produto por ID    |
+| POST   | `/api/produtos`     | Criar produto            |
+| PUT    | `/api/produtos/:id` | Atualizar produto        |
+| DELETE | `/api/produtos/:id` | Remover produto          |
+
+### Categorias
+
+| Método | Rota                  | Descrição                  |
+| ------ | --------------------- | -------------------------- |
+| GET    | `/api/categorias`     | Listar todas as categorias |
+| GET    | `/api/categorias/:id` | Buscar categoria por ID    |
+| POST   | `/api/categorias`     | Criar categoria            |
+| PUT    | `/api/categorias/:id` | Atualizar categoria        |
+| DELETE | `/api/categorias/:id` | Remover categoria          |
+
+### Fornecedores
+
+| Método | Rota                    | Descrição                    |
+| ------ | ----------------------- | ---------------------------- |
+| GET    | `/api/fornecedores`     | Listar todos os fornecedores |
+| GET    | `/api/fornecedores/:id` | Buscar fornecedor por ID     |
+| POST   | `/api/fornecedores`     | Criar fornecedor             |
+| PUT    | `/api/fornecedores/:id` | Atualizar fornecedor         |
+| DELETE | `/api/fornecedores/:id` | Remover fornecedor           |
+
+### Usuários
+
+| Método | Rota                | Descrição                |
+| ------ | ------------------- | ------------------------ |
+| GET    | `/api/usuarios`     | Listar todos os usuários |
+| GET    | `/api/usuarios/:id` | Buscar usuário por ID    |
+| POST   | `/api/usuarios`     | Criar usuário            |
+| PUT    | `/api/usuarios/:id` | Atualizar usuário        |
+| DELETE | `/api/usuarios/:id` | Remover usuário          |
+
+### Tabela Pivô — Produtos × Fornecedores
+
+| Método | Rota                                            | Descrição                         |
+| ------ | ----------------------------------------------- | --------------------------------- |
+| GET    | `/api/produtos/:id/fornecedores`                | Listar fornecedores de um produto |
+| POST   | `/api/produtos/:id/fornecedores`                | Associar fornecedor a produto     |
+| DELETE | `/api/produtos/:id/fornecedores/:fornecedor_id` | Remover associação                |
+
+---
+
+## 18. Autenticação JWT
+
+### Como fazer login
+
+```http
+POST /api/login
+Content-Type: application/json
+
+{
+  "email": "admin@gestoriq.com",
+  "senha": "senha123"
+}
+```
+
+### Resposta
+
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}
+```
+
+### Como usar o token
+
+Em todas as requisições após o login, envie o token no cabeçalho: Authorization: Bearer SEU_TOKEN_AQUI
+
+> Todas as rotas são protegidas por JWT, exceto o `POST /login`.
+
+---
+
+## 19. Documentação Swagger
+
+Com o projeto rodando, acesse a documentação interativa em: http://localhost/api-docs
+
+Na página do Swagger é possível visualizar e testar todas as rotas da API diretamente pelo navegador.
+
+---
+
+## 20. Migrations
+
+Para criar as tabelas no banco de dados, execute:
+
+```bash
+node command.js migrate
+```
