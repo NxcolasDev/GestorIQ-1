@@ -59,16 +59,16 @@ const swaggerDocument = {
         type: 'object',
         required: ['nome'],
         properties: {
-          nome:      { type: 'string', example: 'Eletrônicos' },
-          descricao: { type: 'string', example: 'Produtos eletrônicos em geral' },
+          nome:      { type: 'string', example: 'Eletronicos' },
+          descricao: { type: 'string', example: 'Produtos eletronicos em geral' },
         },
       },
       Categoria: {
         type: 'object',
         properties: {
           id:         { type: 'integer', example: 1 },
-          nome:       { type: 'string',  example: 'Eletrônicos' },
-          descricao:  { type: 'string',  example: 'Produtos eletrônicos em geral' },
+          nome:       { type: 'string',  example: 'Eletronicos' },
+          descricao:  { type: 'string',  example: 'Produtos eletronicos em geral' },
           created_at: { type: 'string',  format: 'date-time' },
           updated_at: { type: 'string',  format: 'date-time' },
         },
@@ -122,7 +122,7 @@ const swaggerDocument = {
       Erro: {
         type: 'object',
         properties: {
-          erro: { type: 'string', example: 'Recurso não encontrado' },
+          erro: { type: 'string', example: 'Recurso nao encontrado' },
         },
       },
     },
@@ -135,7 +135,7 @@ const swaggerDocument = {
       post: {
         tags: ['Auth'],
         summary: 'Gerar token JWT',
-        description: 'Autentica o usuário e retorna um token JWT válido por 24h.',
+        description: 'Autentica o usuario e retorna um token JWT valido por 24h.',
         security: [],
         requestBody: {
           required: true,
@@ -154,61 +154,61 @@ const swaggerDocument = {
               },
             },
           },
-          401: { description: 'Credenciais inválidas' },
+          401: { description: 'Credenciais invalidas' },
         },
       },
     },
 
     '/usuarios': {
       get: {
-        tags: ['Usuários'],
-        summary: 'Listar usuários',
+        tags: ['Usuarios'],
+        summary: 'Listar usuarios',
         responses: {
-          200: { description: 'Lista de usuários', content: { 'application/json': { schema: { type: 'array', items: { $ref: '#/components/schemas/Usuario' } } } } },
-          401: { description: 'Token ausente ou inválido' },
+          200: { description: 'Lista de usuarios', content: { 'application/json': { schema: { type: 'array', items: { $ref: '#/components/schemas/Usuario' } } } } },
+          401: { description: 'Token ausente ou invalido' },
         },
       },
       post: {
-        tags: ['Usuários'],
-        summary: 'Criar usuário',
+        tags: ['Usuarios'],
+        summary: 'Criar usuario',
         requestBody: { required: true, content: { 'application/json': { schema: { $ref: '#/components/schemas/UsuarioInput' } } } },
         responses: {
-          201: { description: 'Usuário criado', content: { 'application/json': { schema: { $ref: '#/components/schemas/Usuario' } } } },
-          400: { description: 'Dados inválidos' },
-          401: { description: 'Token ausente ou inválido' },
+          201: { description: 'Usuario criado', content: { 'application/json': { schema: { $ref: '#/components/schemas/Usuario' } } } },
+          400: { description: 'Dados invalidos' },
+          401: { description: 'Token ausente ou invalido' },
         },
       },
     },
     '/usuarios/{id}': {
       parameters: [
-        { name: 'id', in: 'path', required: true, schema: { type: 'integer' }, description: 'ID do usuário' },
+        { name: 'id', in: 'path', required: true, schema: { type: 'integer' }, description: 'ID do usuario' },
       ],
       get: {
-        tags: ['Usuários'],
-        summary: 'Buscar usuário por ID',
+        tags: ['Usuarios'],
+        summary: 'Buscar usuario por ID',
         responses: {
-          200: { description: 'Usuário encontrado', content: { 'application/json': { schema: { $ref: '#/components/schemas/Usuario' } } } },
-          401: { description: 'Token ausente ou inválido' },
-          404: { description: 'Usuário não encontrado' },
+          200: { description: 'Usuario encontrado', content: { 'application/json': { schema: { $ref: '#/components/schemas/Usuario' } } } },
+          401: { description: 'Token ausente ou invalido' },
+          404: { description: 'Usuario nao encontrado' },
         },
       },
       put: {
-        tags: ['Usuários'],
-        summary: 'Atualizar usuário',
+        tags: ['Usuarios'],
+        summary: 'Atualizar usuario',
         requestBody: { required: true, content: { 'application/json': { schema: { $ref: '#/components/schemas/UsuarioInput' } } } },
         responses: {
-          200: { description: 'Usuário atualizado', content: { 'application/json': { schema: { $ref: '#/components/schemas/Usuario' } } } },
-          401: { description: 'Token ausente ou inválido' },
-          404: { description: 'Usuário não encontrado' },
+          200: { description: 'Usuario atualizado', content: { 'application/json': { schema: { $ref: '#/components/schemas/Usuario' } } } },
+          401: { description: 'Token ausente ou invalido' },
+          404: { description: 'Usuario nao encontrado' },
         },
       },
       delete: {
-        tags: ['Usuários'],
-        summary: 'Remover usuário',
+        tags: ['Usuarios'],
+        summary: 'Remover usuario',
         responses: {
-          204: { description: 'Usuário removido com sucesso' },
-          401: { description: 'Token ausente ou inválido' },
-          404: { description: 'Usuário não encontrado' },
+          204: { description: 'Usuario removido com sucesso' },
+          401: { description: 'Token ausente ou invalido' },
+          404: { description: 'Usuario nao encontrado' },
         },
       },
     },
@@ -219,7 +219,7 @@ const swaggerDocument = {
         summary: 'Listar categorias',
         responses: {
           200: { description: 'Lista de categorias', content: { 'application/json': { schema: { type: 'array', items: { $ref: '#/components/schemas/Categoria' } } } } },
-          401: { description: 'Token ausente ou inválido' },
+          401: { description: 'Token ausente ou invalido' },
         },
       },
       post: {
@@ -228,8 +228,8 @@ const swaggerDocument = {
         requestBody: { required: true, content: { 'application/json': { schema: { $ref: '#/components/schemas/CategoriaInput' } } } },
         responses: {
           201: { description: 'Categoria criada', content: { 'application/json': { schema: { $ref: '#/components/schemas/Categoria' } } } },
-          400: { description: 'Dados inválidos' },
-          401: { description: 'Token ausente ou inválido' },
+          400: { description: 'Dados invalidos' },
+          401: { description: 'Token ausente ou invalido' },
         },
       },
     },
@@ -242,8 +242,8 @@ const swaggerDocument = {
         summary: 'Buscar categoria por ID',
         responses: {
           200: { description: 'Categoria encontrada', content: { 'application/json': { schema: { $ref: '#/components/schemas/Categoria' } } } },
-          401: { description: 'Token ausente ou inválido' },
-          404: { description: 'Categoria não encontrada' },
+          401: { description: 'Token ausente ou invalido' },
+          404: { description: 'Categoria nao encontrada' },
         },
       },
       put: {
@@ -252,8 +252,8 @@ const swaggerDocument = {
         requestBody: { required: true, content: { 'application/json': { schema: { $ref: '#/components/schemas/CategoriaInput' } } } },
         responses: {
           200: { description: 'Categoria atualizada', content: { 'application/json': { schema: { $ref: '#/components/schemas/Categoria' } } } },
-          401: { description: 'Token ausente ou inválido' },
-          404: { description: 'Categoria não encontrada' },
+          401: { description: 'Token ausente ou invalido' },
+          404: { description: 'Categoria nao encontrada' },
         },
       },
       delete: {
@@ -261,8 +261,8 @@ const swaggerDocument = {
         summary: 'Remover categoria',
         responses: {
           204: { description: 'Categoria removida com sucesso' },
-          401: { description: 'Token ausente ou inválido' },
-          404: { description: 'Categoria não encontrada' },
+          401: { description: 'Token ausente ou invalido' },
+          404: { description: 'Categoria nao encontrada' },
         },
       },
     },
@@ -273,7 +273,7 @@ const swaggerDocument = {
         summary: 'Listar fornecedores',
         responses: {
           200: { description: 'Lista de fornecedores', content: { 'application/json': { schema: { type: 'array', items: { $ref: '#/components/schemas/Fornecedor' } } } } },
-          401: { description: 'Token ausente ou inválido' },
+          401: { description: 'Token ausente ou invalido' },
         },
       },
       post: {
@@ -282,8 +282,8 @@ const swaggerDocument = {
         requestBody: { required: true, content: { 'application/json': { schema: { $ref: '#/components/schemas/FornecedorInput' } } } },
         responses: {
           201: { description: 'Fornecedor criado', content: { 'application/json': { schema: { $ref: '#/components/schemas/Fornecedor' } } } },
-          400: { description: 'Dados inválidos' },
-          401: { description: 'Token ausente ou inválido' },
+          400: { description: 'Dados invalidos' },
+          401: { description: 'Token ausente ou invalido' },
         },
       },
     },
@@ -296,8 +296,8 @@ const swaggerDocument = {
         summary: 'Buscar fornecedor por ID',
         responses: {
           200: { description: 'Fornecedor encontrado', content: { 'application/json': { schema: { $ref: '#/components/schemas/Fornecedor' } } } },
-          401: { description: 'Token ausente ou inválido' },
-          404: { description: 'Fornecedor não encontrado' },
+          401: { description: 'Token ausente ou invalido' },
+          404: { description: 'Fornecedor nao encontrado' },
         },
       },
       put: {
@@ -306,8 +306,8 @@ const swaggerDocument = {
         requestBody: { required: true, content: { 'application/json': { schema: { $ref: '#/components/schemas/FornecedorInput' } } } },
         responses: {
           200: { description: 'Fornecedor atualizado', content: { 'application/json': { schema: { $ref: '#/components/schemas/Fornecedor' } } } },
-          401: { description: 'Token ausente ou inválido' },
-          404: { description: 'Fornecedor não encontrado' },
+          401: { description: 'Token ausente ou invalido' },
+          404: { description: 'Fornecedor nao encontrado' },
         },
       },
       delete: {
@@ -315,8 +315,8 @@ const swaggerDocument = {
         summary: 'Remover fornecedor',
         responses: {
           204: { description: 'Fornecedor removido com sucesso' },
-          401: { description: 'Token ausente ou inválido' },
-          404: { description: 'Fornecedor não encontrado' },
+          401: { description: 'Token ausente ou invalido' },
+          404: { description: 'Fornecedor nao encontrado' },
         },
       },
     },
@@ -330,7 +330,7 @@ const swaggerDocument = {
         ],
         responses: {
           200: { description: 'Lista de produtos', content: { 'application/json': { schema: { type: 'array', items: { $ref: '#/components/schemas/Produto' } } } } },
-          401: { description: 'Token ausente ou inválido' },
+          401: { description: 'Token ausente ou invalido' },
         },
       },
       post: {
@@ -339,8 +339,8 @@ const swaggerDocument = {
         requestBody: { required: true, content: { 'application/json': { schema: { $ref: '#/components/schemas/ProdutoInput' } } } },
         responses: {
           201: { description: 'Produto criado', content: { 'application/json': { schema: { $ref: '#/components/schemas/Produto' } } } },
-          400: { description: 'Dados inválidos' },
-          401: { description: 'Token ausente ou inválido' },
+          400: { description: 'Dados invalidos' },
+          401: { description: 'Token ausente ou invalido' },
         },
       },
     },
@@ -353,8 +353,8 @@ const swaggerDocument = {
         summary: 'Buscar produto por ID',
         responses: {
           200: { description: 'Produto encontrado', content: { 'application/json': { schema: { $ref: '#/components/schemas/Produto' } } } },
-          401: { description: 'Token ausente ou inválido' },
-          404: { description: 'Produto não encontrado' },
+          401: { description: 'Token ausente ou invalido' },
+          404: { description: 'Produto nao encontrado' },
         },
       },
       put: {
@@ -363,8 +363,8 @@ const swaggerDocument = {
         requestBody: { required: true, content: { 'application/json': { schema: { $ref: '#/components/schemas/ProdutoInput' } } } },
         responses: {
           200: { description: 'Produto atualizado', content: { 'application/json': { schema: { $ref: '#/components/schemas/Produto' } } } },
-          401: { description: 'Token ausente ou inválido' },
-          404: { description: 'Produto não encontrado' },
+          401: { description: 'Token ausente ou invalido' },
+          404: { description: 'Produto nao encontrado' },
         },
       },
       delete: {
@@ -372,8 +372,8 @@ const swaggerDocument = {
         summary: 'Remover produto',
         responses: {
           204: { description: 'Produto removido com sucesso' },
-          401: { description: 'Token ausente ou inválido' },
-          404: { description: 'Produto não encontrado' },
+          401: { description: 'Token ausente ou invalido' },
+          404: { description: 'Produto nao encontrado' },
         },
       },
     },
@@ -383,19 +383,19 @@ const swaggerDocument = {
         { name: 'id', in: 'path', required: true, schema: { type: 'integer' }, description: 'ID do produto' },
       ],
       get: {
-        tags: ['Produtos × Fornecedores'],
+        tags: ['Produtos x Fornecedores'],
         summary: 'Listar fornecedores de um produto',
-        description: 'Retorna todos os fornecedores associados ao produto via tabela pivô.',
+        description: 'Retorna todos os fornecedores associados ao produto via tabela pivo.',
         responses: {
           200: { description: 'Fornecedores do produto', content: { 'application/json': { schema: { type: 'array', items: { $ref: '#/components/schemas/Fornecedor' } } } } },
-          401: { description: 'Token ausente ou inválido' },
-          404: { description: 'Produto não encontrado' },
+          401: { description: 'Token ausente ou invalido' },
+          404: { description: 'Produto nao encontrado' },
         },
       },
       post: {
-        tags: ['Produtos × Fornecedores'],
+        tags: ['Produtos x Fornecedores'],
         summary: 'Associar fornecedor a produto',
-        description: 'Cria um registro na tabela pivô produto_fornecedor.',
+        description: 'Cria um registro na tabela pivo produto_fornecedor.',
         requestBody: {
           required: true,
           content: {
@@ -411,9 +411,9 @@ const swaggerDocument = {
           },
         },
         responses: {
-          201: { description: 'Associação criada com sucesso' },
-          400: { description: 'Dados inválidos ou associação já existente' },
-          401: { description: 'Token ausente ou inválido' },
+          201: { description: 'Associacao criada com sucesso' },
+          400: { description: 'Dados invalidos ou associacao ja existente' },
+          401: { description: 'Token ausente ou invalido' },
         },
       },
     },
@@ -423,13 +423,13 @@ const swaggerDocument = {
         { name: 'fornecedor_id', in: 'path', required: true, schema: { type: 'integer' }, description: 'ID do fornecedor' },
       ],
       delete: {
-        tags: ['Produtos × Fornecedores'],
-        summary: 'Remover associação produto–fornecedor',
-        description: 'Remove o registro da tabela pivô produto_fornecedor.',
+        tags: ['Produtos x Fornecedores'],
+        summary: 'Remover associacao produto-fornecedor',
+        description: 'Remove o registro da tabela pivo produto_fornecedor.',
         responses: {
-          204: { description: 'Associação removida com sucesso' },
-          401: { description: 'Token ausente ou inválido' },
-          404: { description: 'Associação não encontrada' },
+          204: { description: 'Associacao removida com sucesso' },
+          401: { description: 'Token ausente ou invalido' },
+          404: { description: 'Associacao nao encontrada' },
         },
       },
     },
