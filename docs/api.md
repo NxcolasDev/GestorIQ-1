@@ -7,11 +7,11 @@
 - `POST /api/auth/login` - autentica e retorna token JWT.
 
 ### Produtos
-- `GET /api/products` - lista produtos.
-- `GET /api/products/:id` - retorna produto por id.
-- `POST /api/products` - cria produto (requer token).
-- `PUT /api/products/:id` - atualiza produto (requer token).
-- `DELETE /api/products/:id` - remove produto (requer token).
+- `GET /api/produtos` - lista produtos.
+- `GET /api/produtos/:id` - retorna produto por id.
+- `POST /api/produtos` - cria produto (requer token).
+- `PUT /api/produtos/:id` - atualiza produto (requer token).
+- `DELETE /api/produtos/:id` - remove produto (requer token).
 
 ## Documentação Swagger
 - UI em `/api-docs`
