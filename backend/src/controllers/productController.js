@@ -13,16 +13,16 @@ function parseId(id) {
 }
 
 function sendError(res, error) {
-  const statusCode = error.statusCode || 500;
+  const statusCode = error.statusCode || (error.name === 'SequelizeValidationError' ? 400 : 500);
 
   return res.status(statusCode).json({
-    error: error.message || 'Erro interno do servidor.',
+    message: error.message || 'Erro interno do servidor.',
   });
 }
 
 async function listProducts(req, res) {
   try {
-    const products = await productService.listProducts();
+    const products = await productService.listProducts(req.query);
     return res.status(200).json(products);
   } catch (error) {
     return sendError(res, error);
