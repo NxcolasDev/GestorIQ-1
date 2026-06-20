@@ -1,71 +1,70 @@
-function getProductModel() {
-  try {
-    const models = require('../models');
-    return models.Product || models.product || models;
-  } catch (error) {
-    const modelError = new Error('Model Product ainda nao foi configurado em src/models.');
-    modelError.statusCode = 503;
-    throw modelError;
-  }
+const { query } = require('../config/database');
+const { createCrudService } = require('./crudService');
+
+const productCrud = createCrudService({
+  table: 'produtos',
+  allowedFields: ['nome', 'descricao', 'preco', 'quantidade_estoque', 'categoria_id'],
+  requiredFields: ['nome', 'preco', 'quantidade_estoque', 'categoria_id'],
+});
+
+async function listSuppliers(productId) {
+  await productCrud.getById(productId);
+
+  const result = await query(
+    `SELECT f.id, f.nome, f.cnpj, f.telefone, f.email, f.created_at, f.updated_at
+     FROM fornecedores f
+     INNER JOIN produto_fornecedor pf ON pf.fornecedor_id = f.id
+     WHERE pf.produto_id = $1
+     ORDER BY f.id`,
+    [productId],
+  );
+
+  return result.rows;
 }
 
-function validatePayload(payload, { partial = false } = {}) {
-  if (!payload || typeof payload !== 'object') {
-    const error = new Error('Dados do produto sao obrigatorios.');
-    error.statusCode = 400;
-    throw error;
-  }
+async function addSupplier(productId, supplierId) {
+  await productCrud.getById(productId);
+  const supplier = await query('SELECT id FROM fornecedores WHERE id = $1', [supplierId]);
 
-  if (!partial && Object.keys(payload).length === 0) {
-    const error = new Error('Dados do produto sao obrigatorios.');
-    error.statusCode = 400;
-    throw error;
-  }
-
-  return payload;
-}
-
-async function listProducts() {
-  const Product = getProductModel();
-  return Product.findAll();
-}
-
-async function getProductById(id) {
-  const Product = getProductModel();
-  const product = await Product.findByPk(id);
-
-  if (!product) {
-    const error = new Error('Produto nao encontrado.');
+  if (supplier.rowCount === 0) {
+    const error = new Error('Fornecedor nao encontrado.');
     error.statusCode = 404;
     throw error;
   }
 
-  return product;
+  const result = await query(
+    `INSERT INTO produto_fornecedor (produto_id, fornecedor_id)
+     VALUES ($1, $2)
+     ON CONFLICT (produto_id, fornecedor_id) DO NOTHING
+     RETURNING produto_id, fornecedor_id, created_at`,
+    [productId, supplierId],
+  );
+
+  if (result.rowCount === 0) {
+    const error = new Error('Associacao ja existente.');
+    error.statusCode = 400;
+    throw error;
+  }
+
+  return result.rows[0];
 }
 
-async function createProduct(payload) {
-  const Product = getProductModel();
-  const data = validatePayload(payload);
-  return Product.create(data);
-}
+async function removeSupplier(productId, supplierId) {
+  const result = await query(
+    'DELETE FROM produto_fornecedor WHERE produto_id = $1 AND fornecedor_id = $2',
+    [productId, supplierId],
+  );
 
-async function updateProduct(id, payload) {
-  const Product = getProductModel();
-  const data = validatePayload(payload, { partial: true });
-  const product = await getProductById(id);
-
-  return product.update(data);
-}
-
-async function deleteProduct(id) {
-  const product = await getProductById(id);
-  await product.destroy();
+  if (result.rowCount === 0) {
+    const error = new Error('Associacao nao encontrada.');
+    error.statusCode = 404;
+    throw error;
+  }
 }
 
 module.exports = {
-  listProducts,
-  getProductById,
-  createProduct,
-  updateProduct,
-  deleteProduct,
+  ...productCrud,
+  listSuppliers,
+  addSupplier,
+  removeSupplier,
 };

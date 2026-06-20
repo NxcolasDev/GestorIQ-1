@@ -11,13 +11,14 @@ WORKDIR /app
 COPY package*.json ./
 
 # Instalar dependências com verificação de integridade
-RUN npm ci --only=production
+RUN npm install --omit=dev
 
 # Copiar código-fonte - camada mais mutável
 COPY src ./src
+COPY command.js ./command.js
 
 # Remover dependências de desenvolvimento
-RUN npm prune --production
+RUN npm prune --omit=dev
 
 # ============================================================================
 # STAGE 2: RUNTIME (Produção)
