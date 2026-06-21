@@ -1,102 +1,119 @@
-version: '3.9'
-
-# ============================================================================
-# SERVIÇOS: Estrutura multicamadas (3+ serviços conforme guia)
-# Camadas: Proxy (Nginx) → Aplicação (Node.js) → Banco de Dados (PostgreSQL)
-# ============================================================================
 services:
-  # APP: Node.js REST API
-  # Responsabilidade: Lógica de negócio e orquestração
+  # =========================
+  # APP (Node.js API)
+  # =========================
   app:
     build:
       context: backend/
       dockerfile: ../Dockerfile
     container_name: gestoriq_app
     restart: unless-stopped
+
     env_file:
       - backend/.env
+
     environment:
       - DB_HOST=postgres
       - DB_PORT=5432
+
     expose:
       - 3000
+
+    volumes:
+      - ./data:/app/data:ro
+
     depends_on:
       postgres:
         condition: service_healthy
+
     healthcheck:
       test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/health', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 10s
+
     networks:
       - app-network
-    # Isolamento: App não exposto diretamente, apenas via Nginx
+
     security_opt:
       - no-new-privileges:true
+
     read_only: true
+
     tmpfs:
       - /tmp
 
-  # POSTGRES: Banco de dados relacional
-  # Responsabilidade: Persistência de dados
-  # Segurança: Em rede interna, inacessível diretamente
+
+  # =========================
+  # POSTGRES (corrigido)
+  # =========================
   postgres:
     image: postgres:17-alpine
     container_name: gestoriq_postgres
     restart: unless-stopped
+
     environment:
-      POSTGRES_DB: gestoriq
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      # Segurança: Usar variáveis em produção, nunca valores fixos
-      POSTGRES_INITDB_ARGS: "-c shared_preload_libraries=pg_stat_statements"
+      POSTGRES_DB: ${DB_NAME:-gestoriq}
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+
     volumes:
-      # Named Volume: Persistência de dados resiliente
+      # ✅ VOLUME CORRETO (Docker gerenciado, sem bind do Windows)
       - postgres_data:/var/lib/postgresql/data
+
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -h localhost"]
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 10s
+
     networks:
       - app-network
+
     security_opt:
       - no-new-privileges:true
-    # Isolamento: Apenas app pode conectar
 
-  # NGINX: Reverse Proxy e Load Balancer
-  # Responsabilidade: Roteamento, proxy reverso, terminação TLS (futura)
-  # Segurança: Único serviço exposto ao host/internet
+
+  # =========================
+  # NGINX (proxy)
+  # =========================
   nginx:
     image: nginx:1.27-alpine
     container_name: gestoriq_nginx
     restart: unless-stopped
+
     ports:
       - "80:80"
+
     volumes:
-      # Config global do nginx
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+
     depends_on:
       app:
         condition: service_healthy
+
     healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
+      test: ["CMD-SHELL", "wget --quiet --tries=1 --spider http://127.0.0.1/health || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 10s
+
     networks:
       - web-network
       - app-network
+
     security_opt:
       - no-new-privileges:true
+
     read_only: true
+
     tmpfs:
       - /var/cache/nginx
       - /var/run
-    # Limite de recursos
+
     deploy:
       resources:
         limits:
@@ -106,12 +123,11 @@ services:
           cpus: '0.25'
           memory: 128M
 
-# ============================================================================
-# NETWORKS: Isolamento perimetral em camadas
-# TA005: Custom Bridge Networks - DNS interno automático
-# ============================================================================
+
+# =========================
+# NETWORKS (corrigido)
+# =========================
 networks:
-  # Rede externa: Apenas Nginx exposto
   web-network:
     driver: bridge
     ipam:
@@ -120,24 +136,18 @@ networks:
     driver_opts:
       com.docker.network.bridge.name: br_web
 
-  # Rede interna: App ↔ Postgres (isolada)
   app-network:
     driver: bridge
-    internal: false
+    internal: true
     ipam:
       config:
         - subnet: 172.21.0.0/16
     driver_opts:
       com.docker.network.bridge.name: br_app
 
-# ============================================================================
-# VOLUMES: Persistência de dados
-# TA004: Named Volumes - Resiliente a container removal
-# ============================================================================
+
+# =========================
+# VOLUMES (CORRETO)
+# =========================
 volumes:
   postgres_data:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: ./data/postgres

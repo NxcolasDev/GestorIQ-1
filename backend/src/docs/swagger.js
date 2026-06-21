@@ -4,7 +4,7 @@ const swaggerDocument = {
     title: 'GestorIQ API',
     version: '1.0.0',
     description:
-      'API REST para controle de estoque. Todas as rotas, exceto /login, exigem autenticação via Bearer JWT.',
+      'API REST para controle de estoque. Rotas de login/registro sao publicas; os CRUDs exigem autenticacao via Bearer JWT.',
   },
   servers: [
     {
@@ -122,7 +122,7 @@ const swaggerDocument = {
       Erro: {
         type: 'object',
         properties: {
-          erro: { type: 'string', example: 'Recurso nao encontrado' },
+          error: { type: 'string', example: 'Recurso nao encontrado' },
         },
       },
     },
@@ -155,6 +155,60 @@ const swaggerDocument = {
             },
           },
           401: { description: 'Credenciais invalidas' },
+        },
+      },
+    },
+    '/auth/login': {
+      post: {
+        tags: ['Auth'],
+        summary: 'Gerar token JWT',
+        description: 'Alias de POST /login.',
+        security: [],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: { $ref: '#/components/schemas/LoginInput' },
+            },
+          },
+        },
+        responses: {
+          200: {
+            description: 'Token gerado com sucesso',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/LoginResponse' },
+              },
+            },
+          },
+          401: { description: 'Credenciais invalidas' },
+        },
+      },
+    },
+    '/auth/register': {
+      post: {
+        tags: ['Auth'],
+        summary: 'Registrar usuario',
+        description: 'Cria um usuario sem exigir token. Usado para bootstrap e testes.',
+        security: [],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: { $ref: '#/components/schemas/UsuarioInput' },
+            },
+          },
+        },
+        responses: {
+          201: {
+            description: 'Usuario registrado',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Usuario' },
+              },
+            },
+          },
+          400: { description: 'Dados invalidos' },
         },
       },
     },

@@ -7,4 +7,3 @@ npm-debug.log
 Dockerfile*
 docker-compose*.yml
 docs/
-src/docs/

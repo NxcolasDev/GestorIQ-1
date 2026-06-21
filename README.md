@@ -278,10 +278,122 @@ Na página do Swagger é possível visualizar e testar todas as rotas da API dir
 
 ---
 
-## 20. Migrations
+## 20. Migrations e Seeding
 
-Para criar as tabelas no banco de dados, execute:
+### 20.1 Criar as tabelas (Migrations)
+
+Após subir os containers com `docker compose up -d`, execute:
 
 ```bash
-node command.js migrate
+docker compose exec app node command.js migrate
 ```
+
+Isso criará as 5 tabelas normalizadas:
+- `usuarios` — Usuários do sistema
+- `categorias` — Categorias de produtos
+- `fornecedores` — Fornecedores
+- `produtos` — Produtos do estoque
+- `produto_fornecedor` — Relação N:N
+
+> As migrations são **idempotentes** — podem ser executadas múltiplas vezes sem causar erros.
+
+### 20.2 Popular com dados de teste (Seeding)
+
+Após as migrations, popular com 100+ registros de teste:
+
+```bash
+docker compose exec app node command.js seed
+```
+
+Isso insere:
+- 10 usuários de teste
+- 15 categorias
+- 20 fornecedores
+- 60+ produtos
+- 150+ relacionamentos N:N
+
+### 20.3 Criar usuário admin automático
+
+Criar um usuário admin especial:
+
+```bash
+docker compose exec app node command.js seed-admin
+```
+
+Credenciais padrão:
+- Email: `admin@gestoriq.com`
+- Senha: `senha123` (configurável em `backend/.env` via `ADMIN_PASSWORD`)
+
+### 20.4 Verificar saúde da aplicação
+
+```bash
+docker compose exec app node command.js health
+```
+
+Esperado: 
+```json
+{"status":"ok","database":"connected","timestamp":"2026-01-17T..."}
+```
+
+### 20.5 Fluxo completo de setup
+
+```bash
+# 1. Subir containers
+docker compose up --build -d
+
+# 2. Aguardar health checks ficarem green (~30 segundos)
+docker compose ps
+
+# 3. Criar tabelas
+docker compose exec app node command.js migrate
+
+# 4. Popular com dados de teste
+docker compose exec app node command.js seed
+
+# 5. Criar admin
+docker compose exec app node command.js seed-admin
+
+# 6. Verificar tudo está ok
+docker compose exec app node command.js health
+
+# 7. Acessar Swagger para testar
+# Abra: http://localhost/api-docs
+```
+
+### 20.6 Fazer login e testar
+
+No Swagger ou via curl:
+
+```bash
+curl -X POST http://localhost/api/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"admin@gestoriq.com","senha":"senha123"}'
+```
+
+Resposta esperada:
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}
+```
+
+Copiar o token e usar em requisições posteriores:
+
+```bash
+curl http://localhost/api/categorias \
+  -H "Authorization: Bearer {SEU_TOKEN}"
+```
+
+### 20.7 Resetar banco de dados
+
+Para recomeçar do zero (deleta todos os dados):
+
+```bash
+# Parar containers e remover volume
+docker compose down -v
+
+# Recriar tudo
+docker compose up --build -d
+```
+
+⚠️ **Cuidado:** `-v` deleta o volume PostgreSQL permanentemente!

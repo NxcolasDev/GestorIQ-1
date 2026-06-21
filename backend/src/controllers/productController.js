@@ -1,64 +1,34 @@
 const productService = require('../services/productService');
+const { createCrudController } = require('./crudController');
+const { parseId, sendError } = require('../utils/http');
 
-function parseId(id) {
-  const parsedId = Number(id);
+const crud = createCrudController(productService, 'produto');
 
-  if (!Number.isInteger(parsedId) || parsedId <= 0) {
-    const error = new Error('ID do produto invalido.');
-    error.statusCode = 400;
-    throw error;
-  }
-
-  return parsedId;
-}
-
-function sendError(res, error) {
-  const statusCode = error.statusCode || (error.name === 'SequelizeValidationError' ? 400 : 500);
-
-  return res.status(statusCode).json({
-    message: error.message || 'Erro interno do servidor.',
-  });
-}
-
-async function listProducts(req, res) {
+async function listSuppliers(req, res) {
   try {
-    const products = await productService.listProducts(req.query);
-    return res.status(200).json(products);
+    const suppliers = await productService.listSuppliers(parseId(req.params.id, 'ID do produto'));
+    return res.status(200).json(suppliers);
   } catch (error) {
     return sendError(res, error);
   }
 }
 
-async function getProductById(req, res) {
+async function addSupplier(req, res) {
   try {
-    const product = await productService.getProductById(parseId(req.params.id));
-    return res.status(200).json(product);
+    const supplierId = parseId(req.body.fornecedor_id, 'ID do fornecedor');
+    const association = await productService.addSupplier(parseId(req.params.id, 'ID do produto'), supplierId);
+    return res.status(201).json(association);
   } catch (error) {
     return sendError(res, error);
   }
 }
 
-async function createProduct(req, res) {
+async function removeSupplier(req, res) {
   try {
-    const product = await productService.createProduct(req.body);
-    return res.status(201).json(product);
-  } catch (error) {
-    return sendError(res, error);
-  }
-}
-
-async function updateProduct(req, res) {
-  try {
-    const product = await productService.updateProduct(parseId(req.params.id), req.body);
-    return res.status(200).json(product);
-  } catch (error) {
-    return sendError(res, error);
-  }
-}
-
-async function deleteProduct(req, res) {
-  try {
-    await productService.deleteProduct(parseId(req.params.id));
+    await productService.removeSupplier(
+      parseId(req.params.id, 'ID do produto'),
+      parseId(req.params.fornecedor_id, 'ID do fornecedor'),
+    );
     return res.status(204).send();
   } catch (error) {
     return sendError(res, error);
@@ -66,9 +36,12 @@ async function deleteProduct(req, res) {
 }
 
 module.exports = {
-  listProducts,
-  getProductById,
-  createProduct,
-  updateProduct,
-  deleteProduct,
+  listProducts: crud.list,
+  getProductById: crud.getById,
+  createProduct: crud.create,
+  updateProduct: crud.update,
+  deleteProduct: crud.remove,
+  listSuppliers,
+  addSupplier,
+  removeSupplier,
 };

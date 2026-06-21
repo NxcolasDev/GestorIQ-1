@@ -1,70 +1,38 @@
-const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { User } = require('../models');
+const { query } = require('../config/database');
+const { verifyPassword } = require('../utils/password');
+const userService = require('./userService');
 
-async function registerUser(userData) {
-  const existingUser = await User.findOne({
-    where: {
-      email: userData.email,
-    },
-  });
-
-  if (existingUser) {
-    throw new Error('Email já cadastrado');
+async function login({ email, senha }) {
+  if (!email || !senha) {
+    const error = new Error('Email e senha sao obrigatorios.');
+    error.statusCode = 400;
+    throw error;
   }
 
-  const hashedPassword = await bcrypt.hash(userData.password, 10);
+  const result = await query('SELECT id, nome, email, senha_hash FROM usuarios WHERE email = $1', [email]);
 
-  const user = await User.create({
-    name: userData.name,
-    email: userData.email,
-    password: hashedPassword,
-    role: userData.role || 'viewer',
-  });
-
-  return {
-    id: user.id,
-    name: user.name,
-    email: user.email,
-    role: user.role,
-  };
-}
-
-async function loginUser(email, password) {
-  const user = await User.findOne({
-    where: {
-      email,
-    },
-  });
-
-  if (!user) {
-    throw new Error('Credenciais inválidas');
+  if (result.rowCount === 0 || !verifyPassword(senha, result.rows[0].senha_hash)) {
+    const error = new Error('Credenciais invalidas.');
+    error.statusCode = 401;
+    throw error;
   }
 
-  const isPasswordValid = await bcrypt.compare(password, user.password);
-
-  if (!isPasswordValid) {
-    throw new Error('Credenciais inválidas');
-  }
-
+  const user = result.rows[0];
   const token = jwt.sign(
-    {
-      id: user.id,
-      email: user.email,
-      role: user.role,
-    },
-    process.env.JWT_SECRET,
-    {
-      expiresIn: '24h',
-    }
+    { id: user.id, nome: user.nome, email: user.email },
+    process.env.JWT_SECRET || 'change_this_secret',
+    { expiresIn: '24h' },
   );
 
-  return {
-    token,
-  };
+  return { token };
+}
+
+async function register(payload) {
+  return userService.create(payload);
 }
 
 module.exports = {
-  registerUser,
-  loginUser,
+  login,
+  register,
 };

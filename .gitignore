@@ -1,5 +1,12 @@
-node_modules
+node_modules/
+backend/node_modules/
+
 .env
+backend/.env
+
 .DS_Store
-npm-debug.log
-postgres_data
+npm-debug.log*
+
+postgres_data/
+data/postgres/
+data/postgres/**
