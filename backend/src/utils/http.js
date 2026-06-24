@@ -11,8 +11,20 @@ function parseId(value, label = 'ID') {
 }
 
 function sendError(res, error) {
+  if (
+    error.name === 'SequelizeUniqueConstraintError' ||
+    error.message?.includes('duplicate key value')
+  ) {
+    return res.status(400).json({
+      error: 'Email já cadastrado.',
+    });
+  }
+
   return res.status(error.statusCode || 500).json({
-    error: error.message || 'Erro interno do servidor.',
+    error:
+      error.statusCode
+        ? error.message
+        : 'Erro interno do servidor.',
   });
 }
 
