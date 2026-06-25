@@ -5,11 +5,11 @@ Compose.
 
 ## Integrantes
 Nome	RA
-Nicolas de Jesus Silva	6325171
-João Pedro Paulino Ferreira	6325175
-Matheus Maciel de Paula	6325065
-Renan Dias	6325033
-Yuri Sanches	6325238
+* Nicolas de Jesus Silva-6325171
+* João Pedro Paulino Ferreira-6325175
+* Matheus Maciel de Paula-6325065
+* Renan Dias-6325033
+* Yuri Sanches-6325238
 
 ## 1. Objetivo
 
