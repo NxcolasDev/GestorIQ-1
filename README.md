@@ -1,6 +1,15 @@
 ﻿# GestorIQ
 
-Sistema de gestão de estoque em API REST containerizada com Docker e orquestração via Docker Compose.
+Sistema de gestão de estoque em API REST containerizada com Docker e orquestração via Docker 
+Compose.
+
+## Integrantes
+Nome	RA
+Nicolas de Jesus Silva	6325171
+João Pedro Paulino Ferreira	6325175
+Matheus Maciel de Paula	6325065
+Renan Dias	6325033
+Yuri Sanches	6325238
 
 ## 1. Objetivo
 
