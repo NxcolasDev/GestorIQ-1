@@ -1,7 +1,4 @@
 services:
-  # =========================
-  # APP (Node.js API)
-  # =========================
   app:
     build:
       context: backend/
@@ -15,6 +12,8 @@ services:
     environment:
       - DB_HOST=postgres
       - DB_PORT=5432
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
 
     expose:
       - 3000
@@ -25,9 +24,11 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      redis:
+        condition: service_healthy
 
     healthcheck:
-      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/health', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"]
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/health', (r) => { if (r.statusCode !== 200) throw new Error(r.statusCode) })"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -44,10 +45,6 @@ services:
     tmpfs:
       - /tmp
 
-
-  # =========================
-  # POSTGRES (corrigido)
-  # =========================
   postgres:
     image: postgres:17-alpine
     container_name: gestoriq_postgres
@@ -59,7 +56,6 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
 
     volumes:
-      # ✅ VOLUME CORRETO (Docker gerenciado, sem bind do Windows)
       - postgres_data:/var/lib/postgresql/data
 
     healthcheck:
@@ -75,10 +71,29 @@ services:
     security_opt:
       - no-new-privileges:true
 
+  redis:
+    image: redis:7-alpine
+    container_name: gestoriq_redis
+    restart: unless-stopped
 
-  # =========================
-  # NGINX (proxy)
-  # =========================
+    command: ["redis-server", "--appendonly", "yes"]
+
+    volumes:
+      - redis_data:/data
+
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+    networks:
+      - app-network
+
+    security_opt:
+      - no-new-privileges:true
+
   nginx:
     image: nginx:1.27-alpine
     container_name: gestoriq_nginx
@@ -117,37 +132,21 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '0.5'
+          cpus: "0.5"
           memory: 256M
         reservations:
-          cpus: '0.25'
+          cpus: "0.25"
           memory: 128M
 
-
-# =========================
-# NETWORKS (corrigido)
-# =========================
 networks:
   web-network:
     driver: bridge
-    ipam:
-      config:
-        - subnet: 172.20.0.0/16
-    driver_opts:
-      com.docker.network.bridge.name: br_web
 
   app-network:
     driver: bridge
     internal: true
-    ipam:
-      config:
-        - subnet: 172.21.0.0/16
-    driver_opts:
-      com.docker.network.bridge.name: br_app
 
-
-# =========================
-# VOLUMES (CORRETO)
-# =========================
 volumes:
   postgres_data:
+  redis_data:
+  

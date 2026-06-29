@@ -1,9 +1,40 @@
-node_modules
-npm-debug.log
-.DS_Store
+# Dependências
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Ambiente e segredos
 .env
-.git
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Controle de versão
+.git/
 .gitignore
+
+# Docker e Compose
 Dockerfile*
 docker-compose*.yml
+.dockerignore
+
+# IDE e sistema operacional
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Testes, cache e build
+coverage/
+.nyc_output/
+.cache/
+tmp/
+.tmp/
+dist/
+build/
+
+# Documentação fora do runtime
 docs/
+README.md
